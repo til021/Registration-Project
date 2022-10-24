@@ -69,8 +69,9 @@ def insert_user():
         status, name, telephone, adress = receive_user()
         
         if user_verification(name, telephone, adress) == False:  
-            data[str(int(max(data)) + 1)] = {"Status": status, "Name": name, "Telephone": telephone, "Adress": adress}
-            inserted_ids.append(max(data))
+            max_id = max([int(item) for item in data.keys()]) + 1
+            data[str(max_id)] = {"Status": status, "Name": name, "Telephone": telephone, "Adress": adress}
+            inserted_ids.append(str(max_id))
             
     return inserted_ids  
   
