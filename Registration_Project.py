@@ -1,7 +1,6 @@
 import json
 with open("data_file(2).json", "r") as data_file:
     data = json.load(data_file)
-    print(data)
     
 def received_id():
     """
@@ -16,77 +15,93 @@ def received_id():
         
         if valid_ids == []:
             print("Input not valid.")
+            
         else:
             return valid_ids
-          
+        
+def receive_user(id = 0, name = 0):
+    """
+    Receives user data.
+    """
+    
+    if name == 0:
+        name = input("Insert user name: ")
+    telephone = input("Insert user telephone: ")
+    adress = input("Insert user adress: ")
+    status = True
+    
+    if telephone == "":
+        try:
+            telephone = data[id]["Telephone"]
+        except:
+            telephone = "not given"
+        
+    if adress == "":
+        try:
+            adress = data[id]["Adress"]
+        except:
+            adress = "not given"
+
+    return status, name, telephone, adress
+  
+def user_verification(name, telephone, adress):
+    """
+    Verifies if user data exists in database.
+    """
+    
+    for id in data:
+        if (data[id]["Name"] == name) and (data[id]["Telephone"] == telephone) and (data[id]["Adress"] == adress):
+            data[id]["Status"] = True
+            return True
+    else:
+        return False
+    
 def insert_user():
     """
-    Choose the number of users to upload, then fill their information.
+    Apply the 'receive_user' and 'user_verification' functions to insert user data in the dataframe.
     """
-    inserted_ids = []
     
+    inserted_ids = []
     num_users = int(input("\n How many users do you wish to upload? "))
     
     for user in range(num_users):
-        validation = 0
         print(f"\nFor the {user+1} user:")
-        name = input("Insert user name: ")
-        telephone = input("Insert user telephone: ")
-        adress = input("Insert user adress: ")
-             
-        if telephone == "":
-            telephone = "not given"
+        status, name, telephone, adress = receive_user()
         
-        if adress == "":
-            adress = "not given"
+        if user_verification(name, telephone, adress) == False:  
+            data[str(int(max(data)) + 1)] = {"Status": status, "Name": name, "Telephone": telephone, "Adress": adress}
+            inserted_ids.append(max(data))
             
-        for id in data:
-            if (data[id]["Name"] == name) and (data[id]["Telephone"] == telephone) and (data[id]["Adress"] == adress):
-                data[id]["Status"] = True
-                inserted_ids.append(id)
-                validation = 1
-                
-        if validation == 0:
-            data[str(len(data)+1)] = {"Status": True, "Name": name, "Telephone": telephone, "Adress": adress}
-            inserted_ids.append(str(len(data)))
-            
-    return inserted_ids
+    return inserted_ids  
   
 def remove_user(valid_ids):
     """
     Set user status to False.
     """
+    
     for id in valid_ids:
         data[id]["Status"] = False
+        
     return valid_ids
   
 def update_user(valid_ids):
     """
-    Update user information.
+    Updates the information of a user.
     """
     
     for id in valid_ids:
-        end = False
-        while end == False:
-            print(f"\n Updating user id {id}")
-            info = input("Which information do you wish to update? \n 1 - Name \n 2 - Telephone \n 3 - Adress \n")
-                     
-            if info == "1":
-                data[id]["Name"] = input("Insert new user name: ")
-                end = True
-            elif info == "2":
-                data[id]["Telephone"] = input("Insert new user telephone: ")
-                end = True
-            elif info == "3":
-                data[id]["Adress"] = input(" Insert new user adress: ")
-                end = True
-            else:
-                print("Invalid option.")
-    return valid_ids
+        print(f"\n Updating user id {id}")
+        print(f"Name: {data[id]['Name']}")
+        
+        status, name, telephone, adress = receive_user(id = id, name = data[id]["Name"])
+        data[id]["Telephone"] = telephone
+        data[id]["Adress"] = adress
+    
+    return valid_ids   
   
 def user_info(valid_ids = data.keys()):
     """
-    Print the changes made in data.
+    Print the changes made in the dataframe.
     """
     
     print("----------------------------------")
@@ -105,10 +120,10 @@ def active_users():
     Select users where Status == True.
     """
     
-    ids = []
-    for id in data.keys():
-        if data[id]["Status"] == True:
-            ids.append(id)
+    def status_verification(keys):
+        return data[keys]["Status"] == True
+    
+    ids = list(filter(status_verification, data.keys()))
     return ids
   
 def save_n_leave():
@@ -128,7 +143,7 @@ def save_n_leave():
 working = True
 while working == True:
     print("""
-Welcome to DataManagement Engine!
+Welcome to Tiago's Data Management Engine!
         
  1 - Insert user
  2 - Remove user
